@@ -1,0 +1,106 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+body {
+  width: 100%;
+  height: 100vh;
+  background-color: #15BDAC;
+  text-align: center;
+}
+#container {
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 40px;
+}
+.Game {
+  width: 252px;
+  height: 252px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  align-content: center;
+}
+.button {
+  width: 5.25rem;
+  height: 5.25rem;
+  background-color: #15BDAC;
+  font-size: 3.5rem;
+}
+#topLeft {
+  border-right: 5px solid #0DA191;
+  border-bottom: 5px solid #0DA191;
+}
+#topRight {
+  border-left: 5px solid #0DA191;
+  border-bottom: 5px solid #0DA191;
+}
+#middleCenter {
+  border: 5px solid #0DA191;
+}
+#bottomLeft {
+  border-right: 5px solid #0DA191;
+  border-top: 5px solid #0DA191;
+}
+#bottomRight {
+  border-left: 5px solid #0DA191;
+  border-top: 5px solid #0DA191;
+}
+.status {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.status p {
+  font-size: 13vmin;
+  margin-bottom: 10px;
+  color: #ffffffce;
+}
+.newGame, .resetButton{
+  border-radius: 10px;
+  width: 150px;
+  height: 50px;
+  font-size: 1.25rem;
+  background-color: #f3ff16;
+  color: #000000;
+}
+.resetScore{
+  border-radius: 10px;
+  width: 125px;
+  height: 40px;
+  font-size: 1.10rem;
+  margin-top: -20px;
+  background-color: #f3ff16;
+  color: #000000;
+}
+.hide{
+  display: none;
+}
+h1{
+  font-size: 47px;
+  color: rgba(0, 18, 180, 0.986);
+}
+h3{
+  font-size: 33px;
+  color: #e2e1e1;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+.scores{
+  font-size: 25px;
+  color: rgb(255, 174, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+  margin-top: 20px;
+}
