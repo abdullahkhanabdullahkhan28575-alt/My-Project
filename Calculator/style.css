@@ -4,12 +4,12 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f2f2f2;
+    background-color: #423d3d;
     font-family: arial,sans-serif;
 }
 .calculator{
     width: 340px;
-    background-color: #222;
+    background-color: #101010;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.3);
@@ -31,10 +31,11 @@ body{
 .button{
     display: grid;
     grid-template-columns: repeat(4,1fr);
-    gap:10px;
+    gap:15px;
 }
 button{
     height: 60px;
+    width: 60px;
     
     font-size: 22px;
     border: none;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Expense Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1> Expense Tracker</h1>
+
+<input
+type="text"
+id="expenseName"
+placeholder="Expense Name">
+
+<input
+type="number"
+id="amount"
+placeholder="Amount">
+
+<button onclick="addExpense()">
+Add Expense
+</button>
+
+<h2>
+Monthly Total:
+₹<span id="total">0</span>
+</h2>
+
+<ul id="list"></ul>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

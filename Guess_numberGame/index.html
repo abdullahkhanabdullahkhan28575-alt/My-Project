@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guess the Number</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#000000; --surface:#0a0a0a; --card:#0d0d0d;
+  --neon:#00d4ff; --neon-dim:rgba(0,212,255,0.13); --neon-mid:rgba(0,212,255,0.32);
+  --neon-glow:0 0 8px #00d4ff,0 0 22px rgba(0,212,255,0.35);
+  --green:#00ff88; --red:#ff4d6d; --yellow:#ffd60a;
+  --text:#e0e0e0; --muted:#3a3a3a; --white:#ffffff;
+}
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'Inter',sans-serif;
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:24px; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; top:-80px; left:50%; transform:translateX(-50%);
+  width:500px; height:280px;
+  background:radial-gradient(ellipse,rgba(0,212,255,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.container { position:relative; z-index:1; width:100%; max-width:460px; }
+
+/* topbar */
+.topbar {
+  background:#050505; border:1px solid #181818; border-bottom:none;
+  border-radius:10px 10px 0 0; padding:10px 16px;
+  display:flex; align-items:center; gap:8px;
+}
+.dot { width:11px; height:11px; border-radius:50%; }
+.dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+.topbar-title { margin-left:8px; font-family:'Fira Code',monospace; font-size:11px; color:#2a2a2a; letter-spacing:.05em; }
+
+/* card */
+.card {
+  background:var(--card); border:1px solid #181818; border-top:none;
+  border-radius:0 0 12px 12px; padding:28px 24px 24px;
+}
+
+/* header */
+.header { text-align:center; margin-bottom:22px; }
+.emoji-big {
+  font-size:44px; display:block; margin-bottom:10px;
+  filter:drop-shadow(0 0 10px rgba(0,212,255,0.5)); transition:all .3s;
+}
+.title { font-family:'Fira Code',monospace; font-size:22px; font-weight:700; color:var(--white); }
+.title span { color:var(--neon); text-shadow:var(--neon-glow); }
+.subtitle { margin-top:5px; font-size:12px; color:#2e2e2e; }
+
+/* badge */
+.range-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:transparent; border:1px solid var(--neon-mid); border-radius:20px;
+  padding:4px 14px; font-family:'Fira Code',monospace; font-size:11px;
+  color:var(--neon); text-shadow:0 0 6px var(--neon); margin-bottom:20px;
+}
+
+/* attempts */
+.attempt-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.attempt-label { font-size:11px; color:#2a2a2a; font-family:'Fira Code',monospace; }
+.attempt-count { font-family:'Fira Code',monospace; font-size:11px; color:var(--neon); text-shadow:0 0 6px var(--neon); }
+.attempt-pills { display:flex; gap:4px; }
+.pill { width:16px; height:16px; border-radius:3px; background:#0f0f0f; border:1px solid #1c1c1c; transition:all .25s; }
+.pill.used { background:var(--neon-dim); border-color:var(--neon); box-shadow:0 0 6px rgba(0,212,255,0.35); }
+.pill.used.hot { background:rgba(255,214,10,0.12); border-color:var(--yellow); box-shadow:0 0 6px rgba(255,214,10,0.4); }
+.pill.used.win { background:rgba(0,255,136,0.12); border-color:var(--green); box-shadow:0 0 8px rgba(0,255,136,0.5); }
+
+/* history */
+.history { min-height:26px; display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; }
+.hist-chip {
+  font-family:'Fira Code',monospace; font-size:10px; padding:2px 8px;
+  border-radius:4px; background:#080808; border:1px solid #1a1a1a; color:#2e2e2e;
+  animation:popIn .2s ease;
+}
+.hist-chip.high { border-color:rgba(255,77,109,0.4); color:var(--red); }
+.hist-chip.low  { border-color:rgba(0,255,136,0.3);  color:var(--green); }
+
+/* input */
+.input-group { display:flex; gap:10px; margin-bottom:12px; }
+.num-input {
+  flex:1; background:#050505; border:1.5px solid #1e1e1e;
+  border-radius:8px; color:var(--white); font-family:'Fira Code',monospace;
+  font-size:22px; font-weight:600; padding:12px 16px; outline:none;
+  text-align:center; transition:border-color .2s,box-shadow .2s;
+  -moz-appearance:textfield;
+}
+.num-input::-webkit-outer-spin-button,.num-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.num-input:focus { border-color:var(--neon); box-shadow:0 0 0 2px rgba(0,212,255,0.1),var(--neon-glow); }
+.num-input.shake       { animation:shake .35s ease; }
+.num-input.pulse-green { animation:pulseGreen .5s ease; }
+.num-input.pulse-red   { animation:pulseRed .5s ease; }
+
+.guess-btn {
+  background:transparent; border:1.5px solid var(--neon); border-radius:8px;
+  color:var(--neon); font-family:'Fira Code',monospace; font-size:13px; font-weight:600;
+  padding:12px 18px; cursor:pointer; white-space:nowrap; letter-spacing:.03em;
+  text-shadow:0 0 6px var(--neon);
+  box-shadow:0 0 10px rgba(0,212,255,0.12),inset 0 0 10px rgba(0,212,255,0.03);
+  transition:all .2s;
+}
+.guess-btn:hover  { background:var(--neon-dim); box-shadow:var(--neon-glow); }
+.guess-btn:active { transform:scale(.96); }
+.guess-btn:disabled { opacity:.2; cursor:not-allowed; }
+
+/* hint */
+.hint-box {
+  background:#050505; border:1px solid #181818; border-radius:8px;
+  padding:13px 15px; font-size:13px; line-height:1.55; min-height:50px;
+  display:flex; align-items:flex-start; gap:10px; transition:border-color .3s,box-shadow .3s;
+}
+.hint-box.hint-low   { border-color:rgba(0,255,136,0.35);  box-shadow:0 0 12px rgba(0,255,136,0.05); }
+.hint-box.hint-high  { border-color:rgba(255,77,109,0.35); box-shadow:0 0 12px rgba(255,77,109,0.05); }
+.hint-box.hint-hot   { border-color:rgba(255,214,10,0.4);  box-shadow:0 0 12px rgba(255,214,10,0.07); }
+.hint-box.hint-win   { border-color:var(--neon);           box-shadow:var(--neon-glow); }
+.hint-box.hint-error { border-color:rgba(255,214,10,0.3); }
+.hint-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+.hint-text { color:var(--text); font-size:13px; }
+.cursor {
+  display:inline-block; width:2px; height:13px; background:var(--neon);
+  margin-left:2px; vertical-align:middle;
+  animation:blink .7s step-end infinite; box-shadow:0 0 4px var(--neon);
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* win */
+.win-overlay { display:none; flex-direction:column; align-items:center; text-align:center; padding:4px 0; animation:fadeIn .4s ease; }
+.win-overlay.show { display:flex; }
+.win-title { font-family:'Fira Code',monospace; font-size:20px; font-weight:700; color:var(--neon); text-shadow:var(--neon-glow); margin-bottom:6px; }
+.win-sub   { font-size:13px; color:#333; margin-bottom:14px; }
+.win-sub strong { color:var(--white); }
+.win-stat  { font-family:'Fira Code',monospace; font-size:42px; font-weight:700; color:var(--white); line-height:1; }
+.win-stat-label { font-size:11px; color:#2a2a2a; margin-bottom:20px; font-family:'Fira Code',monospace; }
+.restart-btn {
+  background:transparent; border:1.5px solid var(--neon); border-radius:8px;
+  color:var(--neon); font-family:'Fira Code',monospace; font-size:12px;
+  padding:10px 28px; cursor:pointer; text-shadow:0 0 6px var(--neon);
+  box-shadow:0 0 10px rgba(0,212,255,0.12); transition:all .2s; letter-spacing:.05em;
+}
+.restart-btn:hover  { background:var(--neon-dim); box-shadow:var(--neon-glow); }
+.restart-btn:active { transform:scale(.97); }
+
+#confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes pulseGreen{0%{box-shadow:0 0 0 0 rgba(0,255,136,.5)}70%{box-shadow:0 0 0 10px rgba(0,255,136,0)}100%{box-shadow:0 0 0 0 rgba(0,255,136,0)}}
+@keyframes pulseRed{0%{box-shadow:0 0 0 0 rgba(255,77,109,.5)}70%{box-shadow:0 0 0 10px rgba(255,77,109,0)}100%{box-shadow:0 0 0 0 rgba(255,77,109,0)}}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media(max-width:420px){.card{padding:20px 14px 18px}.title{font-size:18px}}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="container">
+  <div class="topbar">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <span class="topbar-title">Abdullah Project</span>
+  </div>
+  <div class="card">
+    <div class="header">
+      <span class="emoji-big" id="mainEmoji">🎯</span>
+      <div class="title">Guess the <span>Number</span></div>
+      <div class="subtitle">I'm thinking of something between 1 and 100...</div>
+    </div>
+    <div style="text-align:center;margin-bottom:18px;">
+      <span class="range-badge">◈ Range : 1 → 100</span>
+    </div>
+
+    <div id="gameArea">
+      <div class="attempt-row">
+        <span class="attempt-label">attempts</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="attempt-count" id="attCount">0 / 10</span>
+          <div class="attempt-pills" id="pills"></div>
+        </div>
+      </div>
+      <div class="history" id="history"></div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="numInput" min="1" max="100" placeholder="??" autocomplete="off"/>
+        <button class="guess-btn" id="guessBtn" onclick="makeGuess()">Guess →</button>
+      </div>
+      <div class="hint-box" id="hintBox">
+        <span class="hint-icon" id="hintIcon">💡</span>
+        <span class="hint-text" id="hintText"></span>
+      </div>
+    </div>
+
+    <div class="win-overlay" id="winOverlay">
+      <div class="win-title">✦ You cracked it!</div>
+      <div class="win-sub">The number was <strong id="winNum"></strong></div>
+      <div class="win-stat" id="winAttempts"></div>
+      <div class="win-stat-label">// attempts_taken</div>
+      <button class="restart-btn" onclick="restartGame()">↺ play_again()</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let secretNum,attempts,gameOver=false;
+const MAX=10;
+const hints={
+  start:["Pick a number between 1 and 100, yara! 😄"],
+  low:["Are bhaiya, thoda aur upar jao! 📈","Chhota hai yaar, bada socho bada! 🤔","Hint: isse bada number daalna hai dost!","Or Upar! Number bada hai 👆","Nahi, aur upar jaana padega yaar 😄"],
+  high:["ABE! Bahut bada hai bhai, neeche aao! 📉","Thoda kam kar yaar, itna bhi nahi hai 😅","Neeche aaja dost, bahut high ho gaya!","Hint: chhota socho is baar 👇","Zyada mat sochna, neeche chalo bhai!"],
+  warm:["🔥Bahut paas hai aap maharaj!","Ek dum close hai yaar, ek aur try! 🎯","Dil bole ek baar aur! Bahut pass ho dost 🔥","Almost almost! Ho gaya 🔥"],
+  cold:["❄️ Thanda thanda cool cool — bahut door hai!","Hmm, yahan kuch nahi hai bhai 🧊","Ice ice baby ❄️ Bilkul alag direction!","Bahut door nikal gaye, wapas socho 🥶"],
+  invalid:["Arre yaar, 1 se 100 ke beech daalna hai! itna bhi nhi padh paye😅","Invalid number bhai, range dekh ek baar (Chutiya)!","1 to 100 ke andar reh yaar 😄"],
+  lastChance:["⚠️ Last chance hai bhai! Soch samajh ke maar!","⚠️ Yeh tera final attempt hai yaar, ek dum focus! 🎯"],
+};
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+
+let typeTimer=null;
+function typewrite(icon,text,boxClass){
+  clearTimeout(typeTimer);
+  const box=document.getElementById('hintBox');
+  const ico=document.getElementById('hintIcon');
+  const el =document.getElementById('hintText');
+  box.className=`hint-box ${boxClass}`;
+  ico.textContent=icon; el.innerHTML='';
+  let i=0;
+  const cur=document.createElement('span'); cur.className='cursor'; el.appendChild(cur);
+  function tick(){
+    if(i<text.length){cur.before(text[i++]);typeTimer=setTimeout(tick,20);}
+    else setTimeout(()=>cur.remove(),900);
+  }
+  tick();
+}
+
+function initGame(){
+  secretNum=Math.floor(Math.random()*100)+1;
+  attempts=0; gameOver=false;
+  document.getElementById('gameArea').style.display='';
+  document.getElementById('winOverlay').classList.remove('show');
+  document.getElementById('numInput').value='';
+  document.getElementById('numInput').disabled=false;
+  document.getElementById('guessBtn').disabled=false;
+  document.getElementById('mainEmoji').textContent='🎯';
+  document.getElementById('mainEmoji').style.animation='';
+  document.getElementById('history').innerHTML='';
+  document.getElementById('attCount').textContent=`0 / ${MAX}`;
+  buildPills();
+  typewrite('💡',rnd(hints.start),'');
+  document.getElementById('numInput').focus();
+}
+
+function buildPills(){
+  const c=document.getElementById('pills'); c.innerHTML='';
+  for(let i=0;i<MAX;i++){const d=document.createElement('div');d.className='pill';d.id=`pill-${i}`;c.appendChild(d);}
+}
+function fillPill(i,type){
+  const p=document.getElementById(`pill-${i}`);if(!p)return;
+  p.classList.add('used');
+  if(type==='hot') p.classList.add('hot');
+  if(type==='win') p.classList.add('win');
+}
+function addHistory(num,dir){
+  const chip=document.createElement('span');
+  chip.className=`hist-chip ${dir}`;
+  chip.textContent=num+(dir==='high'?' ↑':dir==='low'?' ↓':' ✓');
+  document.getElementById('history').appendChild(chip);
+}
+function animateInput(type){
+  const inp=document.getElementById('numInput');
+  inp.classList.remove('shake','pulse-green','pulse-red'); void inp.offsetWidth;
+  inp.classList.add(type==='shake'?'shake':type==='green'?'pulse-green':'pulse-red');
+}
+
+function makeGuess(){
+  if(gameOver)return;
+  const inp=document.getElementById('numInput');
+  const val=parseInt(inp.value);
+  if(isNaN(val)||val<1||val>100){animateInput('shake');typewrite('⚠️',rnd(hints.invalid),'hint-error');inp.focus();return;}
+  attempts++;
+  document.getElementById('attCount').textContent=`${attempts} / ${MAX}`;
+  const diff=Math.abs(val-secretNum);
+  if(val===secretNum){
+    fillPill(attempts-1,'win'); addHistory(val,'win'); gameOver=true;
+    typewrite('🎉','YESSSS! Tu toh genius hai bhai! Sahi pakad liya!! 🏆','hint-win');
+    setTimeout(showWin,950); return;
+  }
+  const isLow=val<secretNum, isHot=diff<=8, isCold=diff>40;
+  fillPill(attempts-1,isHot?'hot':'');
+  let icon,msg,boxClass;
+  if(isHot){icon='🔥';msg=rnd(hints.warm)+(isLow?' (aur upar!)':' (thoda neeche!)');boxClass='hint-hot';}
+  else if(isCold){icon='❄️';msg=rnd(hints.cold);boxClass=isLow?'hint-low':'hint-high';}
+  else{if(isLow){icon='📈';msg=rnd(hints.low);boxClass='hint-low';}else{icon='📉';msg=rnd(hints.high);boxClass='hint-high';}}
+  if(attempts===MAX-1){icon='⚠️';msg=rnd(hints.lastChance);boxClass='hint-error';}
+  addHistory(val,isLow?'low':'high');
+  animateInput(isLow?'green':'red');
+  typewrite(icon,msg,boxClass);
+  const pool=isHot?['🔥','😮','🤩']:isCold?['🥶','😅','🫠']:isLow?['👆','🤔','👀']:['👇','😬','🤔'];
+  document.getElementById('mainEmoji').textContent=pool[Math.floor(Math.random()*pool.length)];
+  if(attempts>=MAX){gameOver=true;setTimeout(showLoss,400);return;}
+  inp.value=''; inp.focus();
+}
+
+function showWin(){
+  document.getElementById('gameArea').style.display='none';
+  document.getElementById('winOverlay').classList.add('show');
+  document.getElementById('winNum').textContent=secretNum;
+  document.getElementById('winAttempts').textContent=attempts;
+  document.getElementById('mainEmoji').textContent='🏆';
+  document.getElementById('mainEmoji').style.animation='bounce .8s ease infinite';
+  launchConfetti();
+}
+function showLoss(){
+  typewrite('😢',`Time up yaar! Number tha ${secretNum}. Agli baar pakka karenge! 💪`,'hint-error');
+  document.getElementById('numInput').disabled=true;
+  document.getElementById('guessBtn').disabled=true;
+  document.getElementById('mainEmoji').textContent='😵';
+  setTimeout(()=>{if(confirm(`Oops! Number tha ${secretNum} 🙈\nPhir khelega?`))restartGame();},1200);
+}
+function restartGame(){initGame();}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('numInput').addEventListener('keydown',e=>{if(e.key==='Enter')makeGuess();});
+  initGame();
+});
+
+function launchConfetti(){
+  const canvas=document.getElementById('confetti');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const colors=['#00d4ff','#00ff88','#ffd60a','#ff4d6d','#a78bfa','#ffffff'];
+  const pieces=Array.from({length:130},()=>({
+    x:Math.random()*canvas.width,y:Math.random()*-canvas.height,
+    r:Math.random()*5+3,d:Math.random()*2.5+1,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    tilt:Math.random()*10-5,tiltAngle:0,tiltSpeed:Math.random()*.1+.04,
+  }));
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      p.tiltAngle+=p.tiltSpeed;p.y+=p.d+1;p.x+=Math.sin(p.tiltAngle)*1.5;
+      p.tilt=Math.sin(p.tiltAngle)*12;
+      if(p.y>canvas.height){p.y=-10;p.x=Math.random()*canvas.width;}
+      ctx.beginPath();ctx.lineWidth=p.r;ctx.strokeStyle=p.color;ctx.globalAlpha=0.85;
+      ctx.moveTo(p.x+p.tilt+p.r/2,p.y);ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/2);ctx.stroke();
+    });
+    frame++;
+    if(frame<260)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+</script>
+</body>
+</html>

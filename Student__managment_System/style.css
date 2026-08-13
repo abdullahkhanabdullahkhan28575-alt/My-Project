@@ -1,0 +1,151 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#b8fe4f,#00f2fe);
+    padding:30px;
+}
+
+.container{
+    width:100%;
+    max-width:1000px;
+    background:#fff;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 15px 35px rgba(0,0,0,.2);
+}
+
+h1{
+    text-align:center;
+    color:#333;
+    margin-bottom:25px;
+}
+
+.form-box{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.form-box input{
+    padding:12px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:16px;
+    outline:none;
+    transition:.3s;
+}
+
+.form-box input:focus{
+    border-color:#4facfe;
+}
+
+#addBtn{
+    background:#4facfe;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+#addBtn:hover{
+    background:#0077ff;
+    transform:translateY(-2px);
+}
+
+.search-box{
+    margin:20px 0;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:16px;
+}
+
+h2{
+    margin-bottom:15px;
+    color:#444;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:10px;
+}
+
+thead{
+    background:#4facfe;
+    color:#fff;
+}
+
+th,td{
+    padding:15px;
+    text-align:center;
+}
+
+tbody tr:nth-child(even){
+    background:#f5f5f5;
+}
+
+tbody tr:hover{
+    background:#dff4ff;
+    transition:.3s;
+}
+
+button{
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    color:#fff;
+    font-size:14px;
+    transition:.3s;
+}
+
+.edit-btn{
+    background:#28a745;
+    margin-right:5px;
+}
+
+.edit-btn:hover{
+    background:#1e7e34;
+}
+
+.delete-btn{
+    background:#dc3545;
+}
+
+.delete-btn:hover{
+    background:#b52a37;
+}
+
+@media(max-width:768px){
+
+.container{
+    padding:20px;
+}
+
+table{
+    font-size:14px;
+}
+
+th,td{
+    padding:10px;
+}
+
+}
